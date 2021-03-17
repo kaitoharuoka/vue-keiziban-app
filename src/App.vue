@@ -13,19 +13,55 @@
     name="comment"
     v-model="comment"
     ></textarea>
+    <br><br>
+    <button @click="createComment">コメントをサーバーに送る</button>
     <h2>掲示板</h2>
+    <div 
+    v-for="post in posts" 
+    :key="post.name"
+    >
+      <div>名前： {{post.fields.name.stringValue}}</div>
+      <div>コメント： {{post.fields.commnt.stringValue}}</div>
+    </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
       name: "",
-      comment: ""
+      comment: "",
+      posts: []
     };
+  },
+  created() {
+    axios.get("https://firestore.googleapis.com/v1/projects/vue-keiziban-app/databases/(default)/documents/comments")
+    .then(response => {
+      this.posts = response.data.documents;
+    });
+  },
+  methods: {
+    createCommnent() {
+      axios.post("https://firestore.googleapis.com/v1/projects/vue-keiziban-app/databases/(default)/documents/comments",
+      {
+        fields: {
+          name: {
+            stringValue:this.name
+          },
+          comment: {
+            stringValue: this.comment
+          }
+        }
+      }
+    );
+      this.name = "";
+      this.commnet = "";
+    }
   }
-}
+};
 </script>
 
 
